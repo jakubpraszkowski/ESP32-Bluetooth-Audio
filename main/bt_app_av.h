@@ -23,6 +23,21 @@
 #define BT_RC_TG_TAG "RC_TG"
 #define BT_RC_CT_TAG "RC_CT"
 
+/* installation for i2s */
+void bt_i2s_driver_install(void);
+/* uninstallation for i2s */
+void bt_i2s_driver_uninstall(void);
+/* set volume by remote controller */
+void volume_set_by_controller(uint8_t volume);
+/* set volume by local host */
+void volume_set_by_local_host(uint8_t volume);
+/* a2dp event handler */
+void bt_av_hdl_a2d_evt(uint16_t event, void *p_param);
+/* avrc controller event handler */
+void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param);
+/* avrc target event handler */
+void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param);
+
 /**
  * @brief  callback function for A2DP sink
  *

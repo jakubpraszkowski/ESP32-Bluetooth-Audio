@@ -11,21 +11,6 @@
 /* Application layer causes delay value */
 #define APP_DELAY_VALUE 50 // 5ms
 
-/* installation for i2s */
-static void bt_i2s_driver_install(void);
-/* uninstallation for i2s */
-static void bt_i2s_driver_uninstall(void);
-/* set volume by remote controller */
-static void volume_set_by_controller(uint8_t volume);
-/* set volume by local host */
-static void volume_set_by_local_host(uint8_t volume);
-/* a2dp event handler */
-static void bt_av_hdl_a2d_evt(uint16_t event, void *p_param);
-/* avrc controller event handler */
-static void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param);
-/* avrc target event handler */
-static void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param);
-
 /*******************************
  * STATIC VARIABLE DEFINITIONS
  ******************************/
@@ -68,7 +53,7 @@ void bt_i2s_driver_uninstall(void)
     ESP_ERROR_CHECK(dac_continuous_del_channels(tx_chan));
 }
 
-static void volume_set_by_controller(uint8_t volume)
+void volume_set_by_controller(uint8_t volume)
 {
     ESP_LOGI(BT_RC_TG_TAG, "Volume is set by remote controller to: %" PRIu32 "%%", (uint32_t)volume * 100 / 0x7f);
     /* set the volume in protection of lock */
@@ -77,7 +62,7 @@ static void volume_set_by_controller(uint8_t volume)
     _lock_release(&s_volume_lock);
 }
 
-static void volume_set_by_local_host(uint8_t volume)
+void volume_set_by_local_host(uint8_t volume)
 {
     ESP_LOGI(BT_RC_TG_TAG, "Volume is set locally to: %" PRIu32 "%%", (uint32_t)volume * 100 / 0x7f);
     /* set the volume in protection of lock */
@@ -95,7 +80,7 @@ static void volume_set_by_local_host(uint8_t volume)
     }
 }
 
-static void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
+void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_AV_TAG, "%s event: %d", __func__, event);
 
@@ -252,7 +237,7 @@ static void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     }
 }
 
-static void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
+void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_RC_CT_TAG, "%s event: %d", __func__, event);
 
@@ -320,7 +305,7 @@ static void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
     }
 }
 
-static void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
+void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_RC_TG_TAG, "%s event: %d", __func__, event);
 
