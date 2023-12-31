@@ -13,8 +13,6 @@
 
 /* allocate new meta buffer */
 static void bt_app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param);
-/* notification event handler */
-static void bt_av_notify_evt_handler(uint8_t event_id, esp_avrc_rn_param_t *event_parameter);
 /* installation for i2s */
 static void bt_i2s_driver_install(void);
 /* uninstallation for i2s */
@@ -61,16 +59,6 @@ static void bt_app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param)
     memcpy(attr_text, rc->meta_rsp.attr_text, rc->meta_rsp.attr_length);
     attr_text[rc->meta_rsp.attr_length] = 0;
     rc->meta_rsp.attr_text = attr_text;
-}
-
-static void bt_av_notify_evt_handler(uint8_t event_id, esp_avrc_rn_param_t *event_parameter)
-{
-    switch (event_id)
-    {
-    default:
-        ESP_LOGI(BT_AV_TAG, "unhandled event: %d", event_id);
-        break;
-    }
 }
 
 void bt_i2s_driver_install(void)
@@ -325,7 +313,6 @@ static void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
     case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
     {
         ESP_LOGI(BT_RC_CT_TAG, "AVRC event notification: %d", rc->change_ntf.event_id);
-        bt_av_notify_evt_handler(rc->change_ntf.event_id, &rc->change_ntf.event_parameter);
         break;
     }
     /* when feature of remote device indicated, this event comes */
