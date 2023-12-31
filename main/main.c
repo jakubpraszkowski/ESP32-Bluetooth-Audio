@@ -28,20 +28,7 @@ enum
     BT_APP_EVT_STACK_UP = 0,
 };
 
-/********************************
- * STATIC FUNCTION DECLARATIONS
- *******************************/
-
-/* GAP callback function */
-static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
-/* handler for bluetooth stack enabled events */
-static void bt_av_hdl_stack_evt(uint16_t event, void *p_param);
-
-/*******************************
- * STATIC FUNCTION DEFINITIONS
- ******************************/
-
-static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
+void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
     uint8_t *bda = NULL;
 
@@ -87,7 +74,7 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
     }
 }
 
-static void bt_av_hdl_stack_evt(uint16_t event, void *p_param)
+void bt_av_hdl_stack_evt(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_AV_TAG, "%s event: %d", __func__, event);
 
