@@ -11,8 +11,6 @@
 /* Application layer causes delay value */
 #define APP_DELAY_VALUE 50 // 5ms
 
-/* allocate new meta buffer */
-static void bt_app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param);
 /* installation for i2s */
 static void bt_i2s_driver_install(void);
 /* uninstallation for i2s */
@@ -46,20 +44,6 @@ static TaskHandle_t s_vcs_task_hdl = NULL; /* handle for volume change simulatio
 static uint8_t s_volume = 0;               /* local volume value */
 static bool s_volume_notify;               /* notify volume change or not */
 dac_continuous_handle_t tx_chan;
-
-/********************************
- * STATIC FUNCTION DEFINITIONS
- *******************************/
-
-static void bt_app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param)
-{
-    esp_avrc_ct_cb_param_t *rc = (esp_avrc_ct_cb_param_t *)(param);
-    uint8_t *attr_text = (uint8_t *)malloc(rc->meta_rsp.attr_length + 1);
-
-    memcpy(attr_text, rc->meta_rsp.attr_text, rc->meta_rsp.attr_length);
-    attr_text[rc->meta_rsp.attr_length] = 0;
-    rc->meta_rsp.attr_text = attr_text;
-}
 
 void bt_i2s_driver_install(void)
 {
@@ -434,9 +418,6 @@ void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param
 {
     switch (event)
     {
-    case ESP_AVRC_CT_METADATA_RSP_EVT:
-        bt_app_alloc_meta_buffer(param);
-        /* fall through */
     case ESP_AVRC_CT_CONNECTION_STATE_EVT:
     case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
     case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
