@@ -85,7 +85,6 @@ void bt_i2s_task_handler(void *arg)
                 data = (uint8_t *)xRingbufferReceiveUpTo(s_ringbuf_i2s, &item_size, (TickType_t)pdMS_TO_TICKS(20), item_size_upto);
                 if (item_size == 0)
                 {
-                    ESP_LOGI(BT_APP_CORE_TAG, "ringbuffer underflowed! mode changed: RINGBUFFER_MODE_PREFETCHING");
                     ringbuffer_mode = PREFETCHING;
                     break;
                 }
@@ -151,7 +150,6 @@ void bt_app_task_shut_down(void)
 
 void bt_i2s_task_start_up(void)
 {
-    ESP_LOGI(BT_APP_CORE_TAG, "ringbuffer data empty! mode changed: RINGBUFFER_MODE_PREFETCHING");
     ringbuffer_mode = PREFETCHING;
     if ((s_i2s_write_semaphore = xSemaphoreCreateBinary()) == NULL)
     {
@@ -192,11 +190,9 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
 
     if (ringbuffer_mode == DROPPING)
     {
-        ESP_LOGW(BT_APP_CORE_TAG, "ringbuffer is full, drop this packet!");
         vRingbufferGetInfo(s_ringbuf_i2s, NULL, NULL, NULL, NULL, &item_size);
         if (item_size <= RINGBUF_PREFETCH_WATER_LEVEL)
         {
-            ESP_LOGI(BT_APP_CORE_TAG, "ringbuffer data decreased! mode changed: RINGBUFFER_MODE_PROCESSING");
             ringbuffer_mode = PROCESSING;
         }
         return 0;
@@ -206,7 +202,6 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
 
     if (!done)
     {
-        ESP_LOGW(BT_APP_CORE_TAG, "ringbuffer overflowed, ready to decrease data! mode changed: RINGBUFFER_MODE_DROPPING");
         ringbuffer_mode = DROPPING;
     }
 
@@ -215,7 +210,6 @@ size_t write_ringbuf(const uint8_t *data, size_t size)
         vRingbufferGetInfo(s_ringbuf_i2s, NULL, NULL, NULL, NULL, &item_size);
         if (item_size >= RINGBUF_PREFETCH_WATER_LEVEL)
         {
-            ESP_LOGI(BT_APP_CORE_TAG, "ringbuffer data increased! mode changed: RINGBUFFER_MODE_PROCESSING");
             ringbuffer_mode = PROCESSING;
             if (pdFALSE == xSemaphoreGive(s_i2s_write_semaphore))
             {
