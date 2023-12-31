@@ -13,8 +13,6 @@
 
 /* allocate new meta buffer */
 static void bt_app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param);
-/* handler for track status change */
-static void bt_av_playback_changed(void);
 /* handler for track playing position change */
 static void bt_av_play_pos_changed(void);
 /* notification event handler */
@@ -69,17 +67,6 @@ static void bt_app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param)
     rc->meta_rsp.attr_text = attr_text;
 }
 
-static void bt_av_playback_changed(void)
-{
-    /* register notification if peer support the event_id */
-    if (esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_TEST, &s_avrc_peer_rn_cap,
-                                           ESP_AVRC_RN_PLAY_STATUS_CHANGE))
-    {
-        esp_avrc_ct_send_register_notification_cmd(APP_RC_CT_TL_RN_PLAYBACK_CHANGE,
-                                                   ESP_AVRC_RN_PLAY_STATUS_CHANGE, 0);
-    }
-}
-
 static void bt_av_play_pos_changed(void)
 {
     /* register notification if peer support the event_id */
@@ -95,12 +82,6 @@ static void bt_av_notify_evt_handler(uint8_t event_id, esp_avrc_rn_param_t *even
 {
     switch (event_id)
     {
-    /* when track status changed, this event comes */
-    case ESP_AVRC_RN_PLAY_STATUS_CHANGE:
-        ESP_LOGI(BT_AV_TAG, "Playback status changed: 0x%x", event_parameter->playback);
-        bt_av_playback_changed();
-        break;
-    /* when track playing position changed, this event comes */
     case ESP_AVRC_RN_PLAY_POS_CHANGED:
         ESP_LOGI(BT_AV_TAG, "Play position changed: %" PRIu32 "-ms", event_parameter->play_pos);
         bt_av_play_pos_changed();
@@ -392,7 +373,6 @@ static void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
         ESP_LOGI(BT_RC_CT_TAG, "remote rn_cap: count %d, bitmask 0x%x", rc->get_rn_caps_rsp.cap_count,
                  rc->get_rn_caps_rsp.evt_set.bits);
         s_avrc_peer_rn_cap.bits = rc->get_rn_caps_rsp.evt_set.bits;
-        bt_av_playback_changed();
         bt_av_play_pos_changed();
         break;
     }
