@@ -62,22 +62,6 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
         break;
     }
 
-#if (CONFIG_BT_SSP_ENABLED == true)
-    /* when Security Simple Pairing user confirmation requested, this event comes */
-    case ESP_BT_GAP_CFM_REQ_EVT:
-        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_CFM_REQ_EVT Please compare the numeric value: %" PRIu32, param->cfm_req.num_val);
-        esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
-        break;
-    /* when Security Simple Pairing passkey notified, this event comes */
-    case ESP_BT_GAP_KEY_NOTIF_EVT:
-        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_KEY_NOTIF_EVT passkey: %" PRIu32, param->key_notif.passkey);
-        break;
-    /* when Security Simple Pairing passkey requested, this event comes */
-    case ESP_BT_GAP_KEY_REQ_EVT:
-        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_KEY_REQ_EVT Please enter passkey!");
-        break;
-#endif
-
     /* when GAP mode changed, this event comes */
     case ESP_BT_GAP_MODE_CHG_EVT:
         ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_MODE_CHG_EVT mode: %d", param->mode_chg.mode);
@@ -184,13 +168,6 @@ void app_main(void)
         ESP_LOGE(BT_AV_TAG, "%s enable bluedroid failed: %s\n", __func__, esp_err_to_name(err));
         return;
     }
-
-#if (CONFIG_BT_SSP_ENABLED == true)
-    /* set default parameters for Secure Simple Pairing */
-    esp_bt_sp_param_t param_type = ESP_BT_SP_IOCAP_MODE;
-    esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_IO;
-    esp_bt_gap_set_security_param(param_type, &iocap, sizeof(uint8_t));
-#endif
 
     /* set default parameters for Legacy Pairing (use fixed pin code 1234) */
     esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_FIXED;
