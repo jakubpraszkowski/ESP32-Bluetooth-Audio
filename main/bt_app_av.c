@@ -128,30 +128,9 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     case ESP_A2D_AUDIO_CFG_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
-        ESP_LOGI(BT_AV_TAG, "A2DP audio stream configuration, codec type: %d", a2d->audio_cfg.mcc.type);
-        /* for now only SBC stream is supported */
         if (a2d->audio_cfg.mcc.type == ESP_A2D_MCT_SBC)
         {
-            int sample_rate = 16000;
-            int ch_count = 2;
-            char oct0 = a2d->audio_cfg.mcc.cie.sbc[0];
-            if (oct0 & (0x01 << 6))
-            {
-                sample_rate = 32000;
-            }
-            else if (oct0 & (0x01 << 5))
-            {
-                sample_rate = 44100;
-            }
-            else if (oct0 & (0x01 << 4))
-            {
-                sample_rate = 48000;
-            }
-
-            if (oct0 & (0x01 << 3))
-            {
-                ch_count = 1;
-            }
+            int sample_rate = 44100;
 
             dac_continuous_disable(tx_chan);
             dac_continuous_del_channels(tx_chan);
@@ -162,19 +141,12 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
                 .freq_hz = sample_rate,
                 .offset = 127,
                 .clk_src = DAC_DIGI_CLK_SRC_DEFAULT, // Using APLL as clock source to get a wider frequency range
-                .chan_mode = (ch_count == 1) ? DAC_CHANNEL_MODE_SIMUL : DAC_CHANNEL_MODE_ALTER,
+                .chan_mode = DAC_CHANNEL_MODE_ALTER,
             };
             /* Allocate continuous channels */
             dac_continuous_new_channels(&cont_cfg, &tx_chan);
             /* Enable the continuous channels */
             dac_continuous_enable(tx_chan);
-
-            ESP_LOGI(BT_AV_TAG, "Configure audio player: %x-%x-%x-%x",
-                     a2d->audio_cfg.mcc.cie.sbc[0],
-                     a2d->audio_cfg.mcc.cie.sbc[1],
-                     a2d->audio_cfg.mcc.cie.sbc[2],
-                     a2d->audio_cfg.mcc.cie.sbc[3]);
-            ESP_LOGI(BT_AV_TAG, "Audio player configured, sample rate: %d", sample_rate);
         }
         break;
     }
@@ -349,10 +321,6 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
         break;
     }
 }
-
-/********************************
- * EXTERNAL FUNCTION DEFINITIONS
- *******************************/
 
 void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 {
