@@ -128,15 +128,6 @@ void app_main(void)
         return;
     }
 
-    /* set default parameters for Legacy Pairing (use fixed pin code 1234) */
-    // esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_FIXED;
-    // esp_bt_pin_code_t pin_code;
-    // pin_code[0] = '1';
-    // pin_code[1] = '2';
-    // pin_code[2] = '3';
-    // pin_code[3] = '4';
-    // esp_bt_gap_set_pin(pin_type, 4, pin_code);
-
     bt_app_task_start_up();
     /* bluetooth device name, connection mode and profile set up */
     bt_app_work_dispatch(bt_av_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
