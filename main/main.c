@@ -1,9 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2021-2022 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Unlicense OR CC0-1.0
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,10 +20,11 @@
 #include "esp_avrc_api.h"
 
 /* device name */
-#define LOCAL_DEVICE_NAME    "ESP_SPEAKER"
+#define LOCAL_DEVICE_NAME "ESP_SPEAKER"
 
 /* event for stack up */
-enum {
+enum
+{
     BT_APP_EVT_STACK_UP = 0,
 };
 
@@ -50,13 +45,18 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
 {
     uint8_t *bda = NULL;
 
-    switch (event) {
+    switch (event)
+    {
     /* when authentication completed, this event comes */
-    case ESP_BT_GAP_AUTH_CMPL_EVT: {
-        if (param->auth_cmpl.stat == ESP_BT_STATUS_SUCCESS) {
+    case ESP_BT_GAP_AUTH_CMPL_EVT:
+    {
+        if (param->auth_cmpl.stat == ESP_BT_STATUS_SUCCESS)
+        {
             ESP_LOGI(BT_AV_TAG, "authentication success: %s", param->auth_cmpl.device_name);
             esp_log_buffer_hex(BT_AV_TAG, param->auth_cmpl.bda, ESP_BD_ADDR_LEN);
-        } else {
+        }
+        else
+        {
             ESP_LOGE(BT_AV_TAG, "authentication failed, status: %d", param->auth_cmpl.stat);
         }
         break;
@@ -65,12 +65,12 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
 #if (CONFIG_BT_SSP_ENABLED == true)
     /* when Security Simple Pairing user confirmation requested, this event comes */
     case ESP_BT_GAP_CFM_REQ_EVT:
-        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_CFM_REQ_EVT Please compare the numeric value: %"PRIu32, param->cfm_req.num_val);
+        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_CFM_REQ_EVT Please compare the numeric value: %" PRIu32, param->cfm_req.num_val);
         esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
         break;
     /* when Security Simple Pairing passkey notified, this event comes */
     case ESP_BT_GAP_KEY_NOTIF_EVT:
-        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_KEY_NOTIF_EVT passkey: %"PRIu32, param->key_notif.passkey);
+        ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_KEY_NOTIF_EVT passkey: %" PRIu32, param->key_notif.passkey);
         break;
     /* when Security Simple Pairing passkey requested, this event comes */
     case ESP_BT_GAP_KEY_REQ_EVT:
@@ -95,7 +95,8 @@ static void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
                  bda[0], bda[1], bda[2], bda[3], bda[4], bda[5], param->acl_disconn_cmpl_stat.reason);
         break;
     /* others */
-    default: {
+    default:
+    {
         ESP_LOGI(BT_AV_TAG, "event: %d", event);
         break;
     }
@@ -106,9 +107,11 @@ static void bt_av_hdl_stack_evt(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_AV_TAG, "%s event: %d", __func__, event);
 
-    switch (event) {
+    switch (event)
+    {
     /* when do the stack up, this event comes */
-    case BT_APP_EVT_STACK_UP: {
+    case BT_APP_EVT_STACK_UP:
+    {
         esp_bt_dev_set_device_name(LOCAL_DEVICE_NAME);
         esp_bt_gap_register_callback(bt_app_gap_cb);
 
@@ -147,7 +150,8 @@ void app_main(void)
 {
     /* initialize NVS — it is used to store PHY calibration data */
     esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }
@@ -160,19 +164,23 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_BLE));
 
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-    if ((err = esp_bt_controller_init(&bt_cfg)) != ESP_OK) {
+    if ((err = esp_bt_controller_init(&bt_cfg)) != ESP_OK)
+    {
         ESP_LOGE(BT_AV_TAG, "%s initialize controller failed: %s\n", __func__, esp_err_to_name(err));
         return;
     }
-    if ((err = esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT)) != ESP_OK) {
+    if ((err = esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT)) != ESP_OK)
+    {
         ESP_LOGE(BT_AV_TAG, "%s enable controller failed: %s\n", __func__, esp_err_to_name(err));
         return;
     }
-    if ((err = esp_bluedroid_init()) != ESP_OK) {
+    if ((err = esp_bluedroid_init()) != ESP_OK)
+    {
         ESP_LOGE(BT_AV_TAG, "%s initialize bluedroid failed: %s\n", __func__, esp_err_to_name(err));
         return;
     }
-    if ((err = esp_bluedroid_enable()) != ESP_OK) {
+    if ((err = esp_bluedroid_enable()) != ESP_OK)
+    {
         ESP_LOGE(BT_AV_TAG, "%s enable bluedroid failed: %s\n", __func__, esp_err_to_name(err));
         return;
     }

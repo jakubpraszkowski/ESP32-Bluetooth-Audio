@@ -19,9 +19,9 @@
 #include "sys/lock.h"
 
 /* log tags */
-#define BT_AV_TAG       "BT_AV"
-#define BT_RC_TG_TAG    "RC_TG"
-#define BT_RC_CT_TAG    "RC_CT"
+#define BT_AV_TAG "BT_AV"
+#define BT_RC_TG_TAG "RC_TG"
+#define BT_RC_CT_TAG "RC_CT"
 
 /**
  * @brief  callback function for A2DP sink
