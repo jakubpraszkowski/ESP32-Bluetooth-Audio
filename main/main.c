@@ -93,10 +93,6 @@ void bt_av_hdl_stack_evt(uint16_t event, void *p_param)
     }
 }
 
-/*******************************
- * MAIN ENTRY POINT
- ******************************/
-
 void app_main(void)
 {
     /* initialize NVS — it is used to store PHY calibration data */
@@ -108,10 +104,6 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(err);
 
-    /*
-     * This example only uses the functions of Classical Bluetooth.
-     * So release the controller memory for Bluetooth Low Energy.
-     */
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_BLE));
 
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
@@ -137,13 +129,13 @@ void app_main(void)
     }
 
     /* set default parameters for Legacy Pairing (use fixed pin code 1234) */
-    esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_FIXED;
-    esp_bt_pin_code_t pin_code;
-    pin_code[0] = '1';
-    pin_code[1] = '2';
-    pin_code[2] = '3';
-    pin_code[3] = '4';
-    esp_bt_gap_set_pin(pin_type, 4, pin_code);
+    // esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_FIXED;
+    // esp_bt_pin_code_t pin_code;
+    // pin_code[0] = '1';
+    // pin_code[1] = '2';
+    // pin_code[2] = '3';
+    // pin_code[3] = '4';
+    // esp_bt_gap_set_pin(pin_type, 4, pin_code);
 
     bt_app_task_start_up();
     /* bluetooth device name, connection mode and profile set up */
