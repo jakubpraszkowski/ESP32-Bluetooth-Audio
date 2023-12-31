@@ -29,8 +29,6 @@ void bt_i2s_driver_install(void);
 void bt_i2s_driver_uninstall(void);
 /* set volume by remote controller */
 void volume_set_by_controller(uint8_t volume);
-/* set volume by local host */
-void volume_set_by_local_host(uint8_t volume);
 /* a2dp event handler */
 void bt_av_hdl_a2d_evt(uint16_t event, void *p_param);
 /* avrc controller event handler */
