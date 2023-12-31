@@ -352,19 +352,6 @@ static void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
         volume_set_by_controller(rc->set_abs_vol.volume);
         break;
     }
-    /* when notification registered, this event comes */
-    case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT:
-    {
-        ESP_LOGI(BT_RC_TG_TAG, "AVRC register event notification: %d, param: 0x%" PRIx32, rc->reg_ntf.event_id, rc->reg_ntf.event_parameter);
-        if (rc->reg_ntf.event_id == ESP_AVRC_RN_VOLUME_CHANGE)
-        {
-            s_volume_notify = true;
-            esp_avrc_rn_param_t rn_param;
-            rn_param.volume = s_volume;
-            esp_avrc_tg_send_rn_rsp(ESP_AVRC_RN_VOLUME_CHANGE, ESP_AVRC_RN_RSP_INTERIM, &rn_param);
-        }
-        break;
-    }
     /* when feature of remote device indicated, this event comes */
     case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
     {
@@ -441,7 +428,6 @@ void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param
     case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
     case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
-    case ESP_AVRC_TG_REGISTER_NOTIFICATION_EVT:
     case ESP_AVRC_TG_SET_PLAYER_APP_VALUE_EVT:
         bt_app_work_dispatch(bt_av_hdl_avrc_tg_evt, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
         break;
