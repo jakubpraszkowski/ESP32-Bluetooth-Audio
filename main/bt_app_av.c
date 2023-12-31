@@ -378,12 +378,6 @@ void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
 {
     write_ringbuf(data, len);
-
-    /* log the number every 100 packets */
-    if (++s_pkt_cnt % 100 == 0)
-    {
-        ESP_LOGI(BT_AV_TAG, "Audio packet count: %" PRIu32, s_pkt_cnt);
-    }
 }
 
 void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param)
