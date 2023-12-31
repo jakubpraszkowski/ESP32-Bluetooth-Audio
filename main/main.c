@@ -20,13 +20,8 @@
 #include "esp_avrc_api.h"
 
 /* device name */
-#define LOCAL_DEVICE_NAME "ESP_SPEAKER"
-
-/* event for stack up */
-enum
-{
-    BT_APP_EVT_STACK_UP = 0,
-};
+#define DEVICE_NAME "INZYNIERKA 2024"
+#define BT_APP_EVT_STACK_UP 0
 
 void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
@@ -68,7 +63,7 @@ void bt_av_hdl_stack_evt(uint16_t event, void *p_param)
     /* when do the stack up, this event comes */
     case BT_APP_EVT_STACK_UP:
     {
-        esp_bt_dev_set_device_name(LOCAL_DEVICE_NAME);
+        esp_bt_dev_set_device_name(DEVICE_NAME);
         esp_bt_gap_register_callback(bt_app_gap_cb);
 
         assert(esp_avrc_ct_init() == ESP_OK);
