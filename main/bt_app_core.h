@@ -53,11 +53,6 @@ typedef struct
     void *param;    /*!< parameter area needs to be last */
 } bt_app_msg_t;
 
-/* GAP callback function */
-void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
-/* handler for bluetooth stack enabled events */
-void bt_av_hdl_stack_evt(uint16_t event, void *p_param);
-
 void bt_app_task_handler(void *arg);
 /* handler for I2S task */
 void bt_i2s_task_handler(void *arg);
