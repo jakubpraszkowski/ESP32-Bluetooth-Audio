@@ -37,7 +37,7 @@ void bt_app_task_handler(void *arg)
 {
     bt_app_msg_t msg;
 
-    for (;;)
+    while (true)
     {
         /* receive message from work queue and handle it */
         if (pdTRUE == xQueueReceive(s_bt_app_task_queue, &msg, (TickType_t)portMAX_DELAY))
@@ -74,11 +74,11 @@ void bt_i2s_task_handler(void *arg)
     const size_t item_size_upto = 240 * 6;
     size_t bytes_written = 0;
 
-    for (;;)
+    while (true)
     {
         if (pdTRUE == xSemaphoreTake(s_i2s_write_semaphore, portMAX_DELAY))
         {
-            for (;;)
+            while (true)
             {
                 item_size = 0;
                 /* receive data from ringbuffer and write it to I2S DMA transmit buffer */
