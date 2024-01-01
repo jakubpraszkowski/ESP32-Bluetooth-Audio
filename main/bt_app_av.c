@@ -29,12 +29,12 @@ void bt_i2s_driver_install(void)
         .buf_size = 2048,
         .freq_hz = 44100,
         .offset = 127,
-        .clk_src = DAC_DIGI_CLK_SRC_DEFAULT, // Using APLL as clock source to get a wider frequency range
+        .clk_src = DAC_DIGI_CLK_SRC_DEFAULT,
         .chan_mode = DAC_CHANNEL_MODE_ALTER,
     };
-    /* Allocate continuous channels */
+
     ESP_ERROR_CHECK(dac_continuous_new_channels(&cont_cfg, &tx_chan));
-    /* Enable the continuous channels */
+
     ESP_ERROR_CHECK(dac_continuous_enable(tx_chan));
 }
 
@@ -46,8 +46,6 @@ void bt_i2s_driver_uninstall(void)
 
 void volume_set_by_controller(uint8_t volume)
 {
-    ESP_LOGI(BT_RC_TG_TAG, "Volume is set by remote controller to: %" PRIu32 "%%", (uint32_t)volume * 100 / 0x7f);
-    /* set the volume in protection of lock */
     _lock_acquire(&s_volume_lock);
     s_volume = volume;
     _lock_release(&s_volume_lock);
@@ -61,7 +59,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
 
     switch (event)
     {
-    /* when connection state changed, this event comes */
     case ESP_A2D_CONNECTION_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -82,7 +79,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         }
         break;
     }
-    /* when audio stream transmission state changed, this event comes */
+
     case ESP_A2D_AUDIO_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -93,7 +90,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         }
         break;
     }
-    /* when audio codec is configured, this event comes */
+
     case ESP_A2D_AUDIO_CFG_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -109,17 +106,17 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
                 .buf_size = 2048,
                 .freq_hz = sample_rate,
                 .offset = 127,
-                .clk_src = DAC_DIGI_CLK_SRC_DEFAULT, // Using APLL as clock source to get a wider frequency range
+                .clk_src = DAC_DIGI_CLK_SRC_DEFAULT,
                 .chan_mode = DAC_CHANNEL_MODE_ALTER,
             };
-            /* Allocate continuous channels */
+
             dac_continuous_new_channels(&cont_cfg, &tx_chan);
-            /* Enable the continuous channels */
+
             dac_continuous_enable(tx_chan);
         }
         break;
     }
-    /* when a2dp init or deinit completed, this event comes */
+
     case ESP_A2D_PROF_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -133,7 +130,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         }
         break;
     }
-    /* When protocol service capabilities configured, this event comes */
+
     case ESP_A2D_SNK_PSC_CFG_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -148,7 +145,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         }
         break;
     }
-    /* when set delay value completed, this event comes */
+
     case ESP_A2D_SNK_SET_DELAY_VALUE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -162,16 +159,14 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         }
         break;
     }
-    /* when get delay value completed, this event comes */
+
     case ESP_A2D_SNK_GET_DELAY_VALUE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
-        ESP_LOGI(BT_AV_TAG, "Get delay report value: delay_value: %u * 1/10 ms", a2d->a2d_get_delay_value_stat.delay_value);
-        /* Default delay value plus delay caused by application layer */
         esp_a2d_sink_set_delay_value(a2d->a2d_get_delay_value_stat.delay_value + APP_DELAY_VALUE);
         break;
     }
-    /* others */
+
     default:
         ESP_LOGE(BT_AV_TAG, "%s unhandled event: %d", __func__, event);
         break;
@@ -189,17 +184,14 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
     case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
     case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
     case ESP_AVRC_CT_REMOTE_FEATURES_EVT:
-    /* when connection state changed, this event comes */
     case ESP_AVRC_CT_CONNECTION_STATE_EVT:
     {
         if (rc->conn_stat.connected)
         {
-            /* get remote supported event_ids of peer AVRCP Target */
             esp_avrc_ct_send_get_rn_capabilities_cmd(APP_RC_CT_TL_GET_CAPS);
         }
         else
         {
-            /* clear peer notification capability record */
             s_avrc_peer_rn_cap.bits = 0;
         }
         break;
@@ -211,7 +203,6 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
         break;
     }
 
-    /* when notification capability of peer device got, this event comes */
     case ESP_AVRC_CT_GET_RN_CAPABILITIES_RSP_EVT:
     {
         s_avrc_peer_rn_cap.bits = rc->get_rn_caps_rsp.evt_set.bits;
@@ -234,14 +225,12 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
     {
     case ESP_AVRC_TG_REMOTE_FEATURES_EVT:
     case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
-    /* when connection state changed, this event comes */
     case ESP_AVRC_TG_CONNECTION_STATE_EVT:
     {
         vTaskDelete(s_vcs_task_hdl);
         break;
     }
 
-    /* when absolute volume command from remote device set, this event comes */
     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
     {
         volume_set_by_controller(rc->set_abs_vol.volume);
