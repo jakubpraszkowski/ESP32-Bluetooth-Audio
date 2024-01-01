@@ -69,9 +69,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     case ESP_A2D_CONNECTION_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
-        uint8_t *bda = a2d->conn_stat.remote_bda;
-        ESP_LOGI(BT_AV_TAG, "A2DP connection state: %s, [%02x:%02x:%02x:%02x:%02x:%02x]",
-                 s_a2d_conn_state_str[a2d->conn_stat.state], bda[0], bda[1], bda[2], bda[3], bda[4], bda[5]);
         if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_DISCONNECTED)
         {
             esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
@@ -197,10 +194,6 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
     /* when connection state changed, this event comes */
     case ESP_AVRC_CT_CONNECTION_STATE_EVT:
     {
-        uint8_t *bda = rc->conn_stat.remote_bda;
-        ESP_LOGI(BT_RC_CT_TAG, "AVRC conn_state event: state %d, [%02x:%02x:%02x:%02x:%02x:%02x]",
-                 rc->conn_stat.connected, bda[0], bda[1], bda[2], bda[3], bda[4], bda[5]);
-
         if (rc->conn_stat.connected)
         {
             /* get remote supported event_ids of peer AVRCP Target */
@@ -216,34 +209,27 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
     /* when passthrough responsed, this event comes */
     case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
     {
-        ESP_LOGI(BT_RC_CT_TAG, "AVRC passthrough rsp: key_code 0x%x, key_state %d, rsp_code %d", rc->psth_rsp.key_code,
-                 rc->psth_rsp.key_state, rc->psth_rsp.rsp_code);
         break;
     }
     /* when metadata responsed, this event comes */
     case ESP_AVRC_CT_METADATA_RSP_EVT:
     {
-        ESP_LOGI(BT_RC_CT_TAG, "AVRC metadata rsp: attribute id 0x%x, %s", rc->meta_rsp.attr_id, rc->meta_rsp.attr_text);
         free(rc->meta_rsp.attr_text);
         break;
     }
     /* when notified, this event comes */
     case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
     {
-        ESP_LOGI(BT_RC_CT_TAG, "AVRC event notification: %d", rc->change_ntf.event_id);
         break;
     }
     /* when feature of remote device indicated, this event comes */
     case ESP_AVRC_CT_REMOTE_FEATURES_EVT:
     {
-        ESP_LOGI(BT_RC_CT_TAG, "AVRC remote features %" PRIx32 ", TG features %x", rc->rmt_feats.feat_mask, rc->rmt_feats.tg_feat_flag);
         break;
     }
     /* when notification capability of peer device got, this event comes */
     case ESP_AVRC_CT_GET_RN_CAPABILITIES_RSP_EVT:
     {
-        ESP_LOGI(BT_RC_CT_TAG, "remote rn_cap: count %d, bitmask 0x%x", rc->get_rn_caps_rsp.cap_count,
-                 rc->get_rn_caps_rsp.evt_set.bits);
         s_avrc_peer_rn_cap.bits = rc->get_rn_caps_rsp.evt_set.bits;
         break;
     }
