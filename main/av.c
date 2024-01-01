@@ -1,7 +1,8 @@
-#include "bt_app_core.h"
-#include "bt_app_av.h"
+#include "core.h"
+#include "av.h"
 
 #define APP_DELAY_VALUE 50
+#define APP_RC_CT_GET_CAPABILITIES 0
 
 static uint32_t s_pkt_cnt = 0;
 static esp_a2d_audio_state_t s_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
@@ -10,15 +11,6 @@ static _lock_t s_volume_lock;
 static TaskHandle_t s_vcs_task_hdl = NULL;
 static uint8_t s_volume = 0;
 dac_continuous_handle_t tx_chan;
-
-enum
-{
-    APP_RC_CT_TL_GET_CAPS,
-    APP_RC_CT_TL_GET_META_DATA,
-    APP_RC_CT_TL_RN_TRACK_CHANGE,
-    APP_RC_CT_TL_RN_PLAYBACK_CHANGE,
-    APP_RC_CT_TL_RN_PLAY_POS_CHANGE
-};
 
 void install_i2s_driver(void)
 {
@@ -122,7 +114,7 @@ void handle_bt_avrc_controller_event(uint16_t event, void *p_param)
     {
         if (rc->conn_stat.connected)
         {
-            esp_avrc_ct_send_get_rn_capabilities_cmd(APP_RC_CT_TL_GET_CAPS);
+            esp_avrc_ct_send_get_rn_capabilities_cmd(APP_RC_CT_GET_CAPABILITIES);
         }
         else
         {

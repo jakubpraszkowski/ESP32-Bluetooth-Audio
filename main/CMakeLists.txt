@@ -1,4 +1,3 @@
-idf_component_register(SRCS "bt_app_call.c" "bt_app_av.c"
-                            "bt_app_core.c"
+idf_component_register(SRCS "av.c" "call.c" "core.c"    
                             "main.c"
                     INCLUDE_DIRS ".")

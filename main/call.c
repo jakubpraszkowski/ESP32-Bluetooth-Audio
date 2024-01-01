@@ -1,4 +1,4 @@
-#include "bt_app_call.h"
+#include "call.h"
 
 void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {

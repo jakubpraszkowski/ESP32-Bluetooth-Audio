@@ -14,8 +14,8 @@
 #include "esp_log.h"
 
 #include "esp_bt.h"
-#include "bt_app_core.h"
-#include "bt_app_av.h"
+#include "core.h"
+#include "av.h"
 #include "esp_bt_main.h"
 #include "esp_bt_device.h"
 #include "esp_gap_bt_api.h"

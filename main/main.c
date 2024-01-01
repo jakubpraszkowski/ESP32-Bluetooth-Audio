@@ -1,4 +1,4 @@
-#include "bt_app_call.h"
+#include "call.h"
 
 void app_main(void)
 {

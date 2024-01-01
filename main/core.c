@@ -1,4 +1,4 @@
-#include "bt_app_core.h"
+#include "core.h"
 
 static QueueHandle_t s_bt_app_task_queue = NULL;
 static TaskHandle_t s_bt_app_task_handle = NULL;
