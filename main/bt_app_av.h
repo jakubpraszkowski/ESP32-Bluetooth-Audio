@@ -22,11 +22,11 @@
 #define BT_RC_TG_TAG "RC_TG"
 #define BT_RC_CT_TAG "RC_CT"
 
-void bt_i2s_driver_install(void);
+void i2s_driver_install(void);
 
-void bt_i2s_driver_uninstall(void);
+void i2s_driver_uninstall(void);
 
-void volume_set_by_controller(uint8_t volume);
+void set_volume_by_client(uint8_t volume);
 
 void bt_av_hdl_a2d_evt(uint16_t event, void *p_param);
 

@@ -20,7 +20,7 @@ enum
     APP_RC_CT_TL_RN_PLAY_POS_CHANGE
 };
 
-void bt_i2s_driver_install(void)
+void i2s_driver_install(void)
 {
     dac_continuous_config_t cont_cfg = {
         .chan_mask = DAC_CHANNEL_MASK_ALL,
@@ -37,13 +37,13 @@ void bt_i2s_driver_install(void)
     ESP_ERROR_CHECK(dac_continuous_enable(tx_chan));
 }
 
-void bt_i2s_driver_uninstall(void)
+void i2s_driver_uninstall(void)
 {
     ESP_ERROR_CHECK(dac_continuous_disable(tx_chan));
     ESP_ERROR_CHECK(dac_continuous_del_channels(tx_chan));
 }
 
-void volume_set_by_controller(uint8_t volume)
+void set_volume_by_client(uint8_t volume)
 {
     _lock_acquire(&s_volume_lock);
     s_volume = volume;
@@ -68,17 +68,17 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_DISCONNECTED)
         {
             esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
-            bt_i2s_driver_uninstall();
-            bt_i2s_task_shut_down();
+            i2s_driver_uninstall();
+            i2s_task_shut_down();
         }
         else if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_CONNECTED)
         {
             esp_bt_gap_set_scan_mode(ESP_BT_NON_CONNECTABLE, ESP_BT_NON_DISCOVERABLE);
-            bt_i2s_task_start_up();
+            i2s_task_start_up();
         }
         else if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_CONNECTING)
         {
-            bt_i2s_driver_install();
+            i2s_driver_install();
         }
         break;
     }
@@ -167,7 +167,7 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
 
     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
     {
-        volume_set_by_controller(rc->set_abs_vol.volume);
+        set_volume_by_client(rc->set_abs_vol.volume);
         break;
     }
 
