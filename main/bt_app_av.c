@@ -13,10 +13,6 @@
 
 static uint32_t s_pkt_cnt = 0; /* count for audio packet */
 static esp_a2d_audio_state_t s_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
-/* audio stream datapath state */
-static const char *s_a2d_conn_state_str[] = {"Disconnected", "Connecting", "Connected", "Disconnecting"};
-/* connection state in string */
-static const char *s_a2d_audio_state_str[] = {"Suspended", "Stopped", "Started"};
 /* audio stream datapath state in string */
 static esp_avrc_rn_evt_cap_mask_t s_avrc_peer_rn_cap;
 /* AVRC target notification capability bit mask */
@@ -90,7 +86,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     case ESP_A2D_AUDIO_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
-        ESP_LOGI(BT_AV_TAG, "A2DP audio state: %s", s_a2d_audio_state_str[a2d->audio_stat.state]);
         s_audio_state = a2d->audio_stat.state;
         if (ESP_A2D_AUDIO_STATE_STARTED == a2d->audio_stat.state)
         {
@@ -191,6 +186,9 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
 
     switch (event)
     {
+    case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
+    case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
+    case ESP_AVRC_CT_REMOTE_FEATURES_EVT:
     /* when connection state changed, this event comes */
     case ESP_AVRC_CT_CONNECTION_STATE_EVT:
     {
@@ -206,34 +204,20 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
         }
         break;
     }
-    /* when passthrough responsed, this event comes */
-    case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
-    {
-        break;
-    }
-    /* when metadata responsed, this event comes */
+
     case ESP_AVRC_CT_METADATA_RSP_EVT:
     {
         free(rc->meta_rsp.attr_text);
         break;
     }
-    /* when notified, this event comes */
-    case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
-    {
-        break;
-    }
-    /* when feature of remote device indicated, this event comes */
-    case ESP_AVRC_CT_REMOTE_FEATURES_EVT:
-    {
-        break;
-    }
+
     /* when notification capability of peer device got, this event comes */
     case ESP_AVRC_CT_GET_RN_CAPABILITIES_RSP_EVT:
     {
         s_avrc_peer_rn_cap.bits = rc->get_rn_caps_rsp.evt_set.bits;
         break;
     }
-    /* others */
+
     default:
         ESP_LOGE(BT_RC_CT_TAG, "%s unhandled event: %d", __func__, event);
         break;
