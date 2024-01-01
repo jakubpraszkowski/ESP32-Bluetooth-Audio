@@ -59,6 +59,9 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     switch (event)
     {
     case ESP_A2D_AUDIO_CFG_EVT:
+    case ESP_A2D_PROF_STATE_EVT:
+    case ESP_A2D_SNK_PSC_CFG_EVT:
+    case ESP_A2D_SNK_SET_DELAY_VALUE_EVT:
     case ESP_A2D_CONNECTION_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -87,49 +90,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         if (ESP_A2D_AUDIO_STATE_STARTED == a2d->audio_stat.state)
         {
             s_pkt_cnt = 0;
-        }
-        break;
-    }
-
-    case ESP_A2D_PROF_STATE_EVT:
-    {
-        a2d = (esp_a2d_cb_param_t *)(p_param);
-        if (ESP_A2D_INIT_SUCCESS == a2d->a2d_prof_stat.init_state)
-        {
-            ESP_LOGI(BT_AV_TAG, "A2DP PROF STATE: Init Complete");
-        }
-        else
-        {
-            ESP_LOGI(BT_AV_TAG, "A2DP PROF STATE: Deinit Complete");
-        }
-        break;
-    }
-
-    case ESP_A2D_SNK_PSC_CFG_EVT:
-    {
-        a2d = (esp_a2d_cb_param_t *)(p_param);
-        ESP_LOGI(BT_AV_TAG, "protocol service capabilities configured: 0x%x ", a2d->a2d_psc_cfg_stat.psc_mask);
-        if (a2d->a2d_psc_cfg_stat.psc_mask & ESP_A2D_PSC_DELAY_RPT)
-        {
-            ESP_LOGI(BT_AV_TAG, "Peer device support delay reporting");
-        }
-        else
-        {
-            ESP_LOGI(BT_AV_TAG, "Peer device unsupport delay reporting");
-        }
-        break;
-    }
-
-    case ESP_A2D_SNK_SET_DELAY_VALUE_EVT:
-    {
-        a2d = (esp_a2d_cb_param_t *)(p_param);
-        if (ESP_A2D_SET_INVALID_PARAMS == a2d->a2d_set_delay_value_stat.set_state)
-        {
-            ESP_LOGI(BT_AV_TAG, "Set delay report value: fail");
-        }
-        else
-        {
-            ESP_LOGI(BT_AV_TAG, "Set delay report value: success, delay_value: %u * 1/10 ms", a2d->a2d_set_delay_value_stat.delay_value);
         }
         break;
     }
