@@ -9,14 +9,14 @@ static uint16_t ringbuffer_mode = PROCESSING;
 
 extern dac_continuous_handle_t tx_chan;
 
-bool bt_app_send_msg(bt_app_msg_t *msg)
+bool send_bluetooth_app_message(bt_app_message_t *message)
 {
-    if (msg == NULL)
+    if (message == NULL)
     {
         return false;
     }
 
-    if (xQueueSend(s_bt_app_task_queue, msg, 10 / portTICK_PERIOD_MS) != pdTRUE)
+    if (xQueueSend(s_bt_app_task_queue, message, 10 / portTICK_PERIOD_MS) != pdTRUE)
     {
         ESP_LOGE(BT_APP_CORE_TAG, "%s xQueue send failed", __func__);
         return false;
@@ -24,31 +24,31 @@ bool bt_app_send_msg(bt_app_msg_t *msg)
     return true;
 }
 
-void bt_app_work_dispatched(bt_app_msg_t *msg)
+void dispatch_bluetooth_app_work(bt_app_message_t *msg)
 {
-    if (msg->cb)
+    if (msg->callback)
     {
-        msg->cb(msg->event, msg->param);
+        msg->callback(msg->event, msg->param);
     }
 }
 
-void bt_app_task_handler(void *arg)
+void handle_bluetooth_app_task(void *taskArgument)
 {
-    bt_app_msg_t msg;
+    bt_app_message_t msg;
 
     while (true)
     {
         if (pdTRUE == xQueueReceive(s_bt_app_task_queue, &msg, (TickType_t)portMAX_DELAY))
         {
-            ESP_LOGD(BT_APP_CORE_TAG, "%s, signal: 0x%x, event: 0x%x", __func__, msg.sig, msg.event);
+            ESP_LOGD(BT_APP_CORE_TAG, "%s, signal: 0x%x, event: 0x%x", __func__, msg.signal, msg.event);
 
-            switch (msg.sig)
+            switch (msg.signal)
             {
             case BT_APP_SIG_WORK_DISPATCH:
-                bt_app_work_dispatched(&msg);
+                dispatch_bluetooth_app_work(&msg);
                 break;
             default:
-                ESP_LOGW(BT_APP_CORE_TAG, "%s, unhandled signal: %d", __func__, msg.sig);
+                ESP_LOGW(BT_APP_CORE_TAG, "%s, unhandled signal: %d", __func__, msg.signal);
                 break;
             }
 
@@ -60,7 +60,7 @@ void bt_app_task_handler(void *arg)
     }
 }
 
-void i2s_task_handler(void *arg)
+void handle_i2s_task(void *taskArgument)
 {
     uint8_t *data = NULL;
     size_t item_size = 0;
@@ -94,20 +94,20 @@ void i2s_task_handler(void *arg)
     }
 }
 
-bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback)
+bool dispatch_bluetooth_app_work_with_callback(bt_app_event_callback_t p_cback, uint16_t event, void *p_params, int param_len, copy_bluetooth_app_callback_t p_copy_cback)
 {
     ESP_LOGD(BT_APP_CORE_TAG, "%s event: 0x%x, param len: %d", __func__, event, param_len);
 
-    bt_app_msg_t msg;
-    memset(&msg, 0, sizeof(bt_app_msg_t));
+    bt_app_message_t msg;
+    memset(&msg, 0, sizeof(bt_app_message_t));
 
-    msg.sig = BT_APP_SIG_WORK_DISPATCH;
+    msg.signal = BT_APP_SIG_WORK_DISPATCH;
     msg.event = event;
-    msg.cb = p_cback;
+    msg.callback = p_cback;
 
     if (param_len == 0)
     {
-        return bt_app_send_msg(&msg);
+        return send_bluetooth_app_message(&msg);
     }
     else if (p_params && param_len > 0)
     {
@@ -119,20 +119,20 @@ bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, i
             {
                 p_copy_cback(msg.param, p_params, param_len);
             }
-            return bt_app_send_msg(&msg);
+            return send_bluetooth_app_message(&msg);
         }
     }
 
     return false;
 }
 
-void bt_app_task_start_up(void)
+void start_bluetooth_app_task(void)
 {
-    s_bt_app_task_queue = xQueueCreate(10, sizeof(bt_app_msg_t));
-    xTaskCreate(bt_app_task_handler, "BtAppTask", 3072, NULL, 10, &s_bt_app_task_handle);
+    s_bt_app_task_queue = xQueueCreate(10, sizeof(bt_app_message_t));
+    xTaskCreate(handle_bluetooth_app_task, "BtAppTask", 3072, NULL, 10, &s_bt_app_task_handle);
 }
 
-void bt_app_task_shut_down(void)
+void shut_down_bluetooth_app_task(void)
 {
     if (s_bt_app_task_handle)
     {
@@ -146,7 +146,7 @@ void bt_app_task_shut_down(void)
     }
 }
 
-void i2s_task_start_up(void)
+void start_i2s_task(void)
 {
     ringbuffer_mode = PREFETCHING;
     if ((s_i2s_write_semaphore = xSemaphoreCreateBinary()) == NULL)
@@ -154,15 +154,15 @@ void i2s_task_start_up(void)
         ESP_LOGE(BT_APP_CORE_TAG, "%s, Semaphore create failed", __func__);
         return;
     }
-    if ((s_ringbuf_i2s = xRingbufferCreate(RINGBUF_HIGHEST_WATER_LEVEL, RINGBUF_TYPE_BYTEBUF)) == NULL)
+    if ((s_ringbuf_i2s = xRingbufferCreate(RINGBUF_MAX_WATER_LEVEL, RINGBUF_TYPE_BYTEBUF)) == NULL)
     {
         ESP_LOGE(BT_APP_CORE_TAG, "%s, ringbuffer create failed", __func__);
         return;
     }
-    xTaskCreate(i2s_task_handler, "BtI2STask", 2048, NULL, configMAX_PRIORITIES - 3, &s_bt_i2s_task_handle);
+    xTaskCreate(handle_i2s_task, "BtI2STask", 2048, NULL, configMAX_PRIORITIES - 3, &s_bt_i2s_task_handle);
 }
 
-void i2s_task_shut_down(void)
+void shut_down_i2s_task(void)
 {
     if (s_bt_i2s_task_handle)
     {
@@ -181,7 +181,7 @@ void i2s_task_shut_down(void)
     }
 }
 
-size_t write_ringbuf(const uint8_t *data, size_t size)
+size_t write_to_ringbuffer(const uint8_t *data, size_t size)
 {
     size_t item_size = 0;
     BaseType_t done = pdFALSE;

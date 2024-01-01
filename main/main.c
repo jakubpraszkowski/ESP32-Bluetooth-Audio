@@ -34,7 +34,7 @@ void app_main(void)
         return;
     }
 
-    bt_app_task_start_up();
+    start_bluetooth_app_task();
 
-    bt_app_work_dispatch(bt_av_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
+    dispatch_bluetooth_app_work_with_callback(bt_av_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
 }

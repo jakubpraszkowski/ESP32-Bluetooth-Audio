@@ -19,7 +19,7 @@
 #include "esp_gap_bt_api.h"
 #include "freertos/ringbuf.h"
 
-#define RINGBUF_HIGHEST_WATER_LEVEL (32 * 1024)
+#define RINGBUF_MAX_WATER_LEVEL (32 * 1024)
 #define RINGBUF_PREFETCH_WATER_LEVEL (20 * 1024)
 
 #define BT_APP_CORE_TAG "BT_APP_CORE"
@@ -32,38 +32,38 @@ typedef enum
     PROCESSING,  /* ringbuffer is buffering incoming audio data, I2S is working */
     PREFETCHING, /* ringbuffer is buffering incoming audio data, I2S is waiting */
     DROPPING     /* ringbuffer is not buffering (dropping) incoming audio data, I2S is working */
-} Ringbuffer_mode;
+} ringbuffer_mode_t;
 
-typedef void (*bt_app_cb_t)(uint16_t event, void *param);
+typedef void (*bt_app_event_callback_t)(uint16_t event, void *param);
 
 typedef struct
 {
-    uint16_t sig;   /*!< signal to bt_app_task */
-    uint16_t event; /*!< message event id */
-    bt_app_cb_t cb; /*!< context switch callback */
-    void *param;    /*!< parameter area needs to be last */
-} bt_app_msg_t;
+    uint16_t signal;                  /*!< signal to bt_app_task */
+    uint16_t event;                   /*!< message event id */
+    bt_app_event_callback_t callback; /*!< context switch callback */
+    void *param;                      /*!< parameter area needs to be last */
+} bt_app_message_t;
 
-void bt_app_task_handler(void *arg);
+void handle_bluetooth_app_task(void *arg);
 
-void i2s_task_handler(void *arg);
+void handle_i2s_task(void *arg);
 
-bool bt_app_send_msg(bt_app_msg_t *msg);
+bool send_bluetooth_app_message(bt_app_message_t *msg);
 
-void bt_app_work_dispatched(bt_app_msg_t *msg);
+void dispatch_bluetooth_app_work(bt_app_message_t *msg);
 
-typedef void (*bt_app_copy_cb_t)(void *p_dest, void *p_src, int len);
+typedef void (*copy_bluetooth_app_callback_t)(void *p_dest, void *p_src, int len);
 
-bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, int param_len, bt_app_copy_cb_t p_copy_cback);
+bool dispatch_bluetooth_app_work_with_callback(bt_app_event_callback_t p_cback, uint16_t event, void *p_params, int param_len, copy_bluetooth_app_callback_t p_copy_cback);
 
-void bt_app_task_start_up(void);
+void start_bluetooth_app_task(void);
 
-void bt_app_task_shut_down(void);
+void shut_down_bluetooth_app_task(void);
 
-void i2s_task_start_up(void);
+void start_i2s_task(void);
 
-void i2s_task_shut_down(void);
+void shut_down_i2s_task(void);
 
-size_t write_ringbuf(const uint8_t *data, size_t size);
+size_t write_to_ringbuffer(const uint8_t *data, size_t size);
 
 #endif /* __BT_APP_CORE_H__ */
