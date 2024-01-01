@@ -1,25 +1,24 @@
 #include "bt_app_core.h"
 #include "bt_app_av.h"
 
-/* AVRCP used transaction labels */
-#define APP_RC_CT_TL_GET_CAPS (0)
-#define APP_RC_CT_TL_GET_META_DATA (1)
-#define APP_RC_CT_TL_RN_TRACK_CHANGE (2)
-#define APP_RC_CT_TL_RN_PLAYBACK_CHANGE (3)
-#define APP_RC_CT_TL_RN_PLAY_POS_CHANGE (4)
+#define APP_DELAY_VALUE 50
 
-/* Application layer causes delay value */
-#define APP_DELAY_VALUE 50 // 5ms
-
-static uint32_t s_pkt_cnt = 0; /* count for audio packet */
+static uint32_t s_pkt_cnt = 0;
 static esp_a2d_audio_state_t s_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
-/* audio stream datapath state in string */
 static esp_avrc_rn_evt_cap_mask_t s_avrc_peer_rn_cap;
-/* AVRC target notification capability bit mask */
 static _lock_t s_volume_lock;
-static TaskHandle_t s_vcs_task_hdl = NULL; /* handle for volume change simulation task */
-static uint8_t s_volume = 0;               /* local volume value */
+static TaskHandle_t s_vcs_task_hdl = NULL;
+static uint8_t s_volume = 0;
 dac_continuous_handle_t tx_chan;
+
+enum
+{
+    APP_RC_CT_TL_GET_CAPS,
+    APP_RC_CT_TL_GET_META_DATA,
+    APP_RC_CT_TL_RN_TRACK_CHANGE,
+    APP_RC_CT_TL_RN_PLAYBACK_CHANGE,
+    APP_RC_CT_TL_RN_PLAY_POS_CHANGE
+};
 
 void bt_i2s_driver_install(void)
 {
