@@ -59,6 +59,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
 
     switch (event)
     {
+    case ESP_A2D_AUDIO_CFG_EVT:
     case ESP_A2D_CONNECTION_STATE_EVT:
     {
         a2d = (esp_a2d_cb_param_t *)(p_param);
@@ -87,32 +88,6 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         if (ESP_A2D_AUDIO_STATE_STARTED == a2d->audio_stat.state)
         {
             s_pkt_cnt = 0;
-        }
-        break;
-    }
-
-    case ESP_A2D_AUDIO_CFG_EVT:
-    {
-        a2d = (esp_a2d_cb_param_t *)(p_param);
-        if (a2d->audio_cfg.mcc.type == ESP_A2D_MCT_SBC)
-        {
-            int sample_rate = 44100;
-
-            dac_continuous_disable(tx_chan);
-            dac_continuous_del_channels(tx_chan);
-            dac_continuous_config_t cont_cfg = {
-                .chan_mask = DAC_CHANNEL_MASK_ALL,
-                .desc_num = 8,
-                .buf_size = 2048,
-                .freq_hz = sample_rate,
-                .offset = 127,
-                .clk_src = DAC_DIGI_CLK_SRC_DEFAULT,
-                .chan_mode = DAC_CHANNEL_MODE_ALTER,
-            };
-
-            dac_continuous_new_channels(&cont_cfg, &tx_chan);
-
-            dac_continuous_enable(tx_chan);
         }
         break;
     }
