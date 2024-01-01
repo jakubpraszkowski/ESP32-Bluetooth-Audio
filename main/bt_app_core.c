@@ -1,9 +1,9 @@
 #include "bt_app_core.h"
 
-static QueueHandle_t s_bt_app_task_queue = NULL; /* handle of work queue */
-static TaskHandle_t s_bt_app_task_handle = NULL; /* handle of application task  */
-static TaskHandle_t s_bt_i2s_task_handle = NULL; /* handle of I2S task */
-static RingbufHandle_t s_ringbuf_i2s = NULL;     /* handle of ringbuffer for I2S */
+static QueueHandle_t s_bt_app_task_queue = NULL;
+static TaskHandle_t s_bt_app_task_handle = NULL;
+static TaskHandle_t s_bt_i2s_task_handle = NULL;
+static RingbufHandle_t s_ringbuf_i2s = NULL;
 static SemaphoreHandle_t s_i2s_write_semaphore = NULL;
 static uint16_t ringbuffer_mode = PROCESSING;
 
@@ -16,7 +16,6 @@ bool bt_app_send_msg(bt_app_msg_t *msg)
         return false;
     }
 
-    /* send the message to work queue */
     if (xQueueSend(s_bt_app_task_queue, msg, 10 / portTICK_PERIOD_MS) != pdTRUE)
     {
         ESP_LOGE(BT_APP_CORE_TAG, "%s xQueue send failed", __func__);
@@ -39,7 +38,6 @@ void bt_app_task_handler(void *arg)
 
     while (true)
     {
-        /* receive message from work queue and handle it */
         if (pdTRUE == xQueueReceive(s_bt_app_task_queue, &msg, (TickType_t)portMAX_DELAY))
         {
             ESP_LOGD(BT_APP_CORE_TAG, "%s, signal: 0x%x, event: 0x%x", __func__, msg.sig, msg.event);
@@ -52,7 +50,7 @@ void bt_app_task_handler(void *arg)
             default:
                 ESP_LOGW(BT_APP_CORE_TAG, "%s, unhandled signal: %d", __func__, msg.sig);
                 break;
-            } /* switch (msg.sig) */
+            }
 
             if (msg.param)
             {
@@ -116,7 +114,7 @@ bool bt_app_work_dispatch(bt_app_cb_t p_cback, uint16_t event, void *p_params, i
         if ((msg.param = malloc(param_len)) != NULL)
         {
             memcpy(msg.param, p_params, param_len);
-            /* check if caller has provided a copy callback to do the deep copy */
+
             if (p_copy_cback)
             {
                 p_copy_cback(msg.param, p_params, param_len);

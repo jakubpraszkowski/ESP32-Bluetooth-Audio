@@ -25,9 +25,8 @@
 #define BT_APP_EVT_STACK_UP 0
 #define DEVICE_NAME "INZYNIERKA 2024"
 
-/* GAP callback function */
 void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param);
-/* handler for bluetooth stack enabled events */
+
 void bt_av_hdl_stack_evt(uint16_t event, void *p_param);
 
 #endif /* BT_APP_CALL_H */

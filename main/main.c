@@ -2,7 +2,6 @@
 
 void app_main(void)
 {
-    /* initialize NVS — it is used to store PHY calibration data */
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
@@ -36,6 +35,6 @@ void app_main(void)
     }
 
     bt_app_task_start_up();
-    /* bluetooth device name, connection mode and profile set up */
+
     bt_app_work_dispatch(bt_av_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
 }
