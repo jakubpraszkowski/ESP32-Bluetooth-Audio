@@ -20,7 +20,7 @@ enum
     APP_RC_CT_TL_RN_PLAY_POS_CHANGE
 };
 
-void i2s_driver_install(void)
+void install_i2s_driver(void)
 {
     dac_continuous_config_t cont_cfg = {
         .chan_mask = DAC_CHANNEL_MASK_ALL,
@@ -37,20 +37,20 @@ void i2s_driver_install(void)
     ESP_ERROR_CHECK(dac_continuous_enable(tx_chan));
 }
 
-void i2s_driver_uninstall(void)
+void uninstall_i2s_driver(void)
 {
     ESP_ERROR_CHECK(dac_continuous_disable(tx_chan));
     ESP_ERROR_CHECK(dac_continuous_del_channels(tx_chan));
 }
 
-void set_volume_by_client(uint8_t volume)
+void set_volume_by_bluetooth_client(uint8_t volume)
 {
     _lock_acquire(&s_volume_lock);
     s_volume = volume;
     _lock_release(&s_volume_lock);
 }
 
-void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
+void handle_bt_audio_distribution_event(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_AV_TAG, "%s event: %d", __func__, event);
 
@@ -68,7 +68,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_DISCONNECTED)
         {
             esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
-            i2s_driver_uninstall();
+            uninstall_i2s_driver();
             shut_down_i2s_task();
         }
         else if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_CONNECTED)
@@ -78,7 +78,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
         }
         else if (a2d->conn_stat.state == ESP_A2D_CONNECTION_STATE_CONNECTING)
         {
-            i2s_driver_install();
+            install_i2s_driver();
         }
         break;
     }
@@ -107,7 +107,7 @@ void bt_av_hdl_a2d_evt(uint16_t event, void *p_param)
     }
 }
 
-void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
+void handle_bt_avrc_controller_event(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_RC_CT_TAG, "%s event: %d", __func__, event);
 
@@ -149,7 +149,7 @@ void bt_av_hdl_avrc_ct_evt(uint16_t event, void *p_param)
     }
 }
 
-void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
+void handle_bt_avrc_target_event(uint16_t event, void *p_param)
 {
     ESP_LOGD(BT_RC_TG_TAG, "%s event: %d", __func__, event);
 
@@ -167,7 +167,7 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
 
     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
     {
-        set_volume_by_client(rc->set_abs_vol.volume);
+        set_volume_by_bluetooth_client(rc->set_abs_vol.volume);
         break;
     }
 
@@ -177,7 +177,7 @@ void bt_av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
     }
 }
 
-void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
+void bluetooth_app_audio_distribution_callback(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 {
     switch (event)
     {
@@ -189,7 +189,7 @@ void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
     case ESP_A2D_SNK_SET_DELAY_VALUE_EVT:
     case ESP_A2D_SNK_GET_DELAY_VALUE_EVT:
     {
-        dispatch_bluetooth_app_work_with_callback(bt_av_hdl_a2d_evt, event, param, sizeof(esp_a2d_cb_param_t), NULL);
+        dispatch_bluetooth_app_work_with_callback(handle_bt_audio_distribution_event, event, param, sizeof(esp_a2d_cb_param_t), NULL);
         break;
     }
     default:
@@ -198,12 +198,12 @@ void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
     }
 }
 
-void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
+void bluetooth_app_audio_distribution_data_callback(const uint8_t *data, uint32_t len)
 {
     write_to_ringbuffer(data, len);
 }
 
-void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param)
+void bluetooth_app_avrc_controller_callback(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param)
 {
     switch (event)
     {
@@ -213,7 +213,7 @@ void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param
     case ESP_AVRC_CT_REMOTE_FEATURES_EVT:
     case ESP_AVRC_CT_GET_RN_CAPABILITIES_RSP_EVT:
     {
-        dispatch_bluetooth_app_work_with_callback(bt_av_hdl_avrc_ct_evt, event, param, sizeof(esp_avrc_ct_cb_param_t), NULL);
+        dispatch_bluetooth_app_work_with_callback(handle_bt_avrc_controller_event, event, param, sizeof(esp_avrc_ct_cb_param_t), NULL);
         break;
     }
     default:
@@ -222,7 +222,7 @@ void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param
     }
 }
 
-void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
+void bluetooth_app_avrc_target_callback(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param)
 {
     switch (event)
     {
@@ -231,7 +231,7 @@ void bt_app_rc_tg_cb(esp_avrc_tg_cb_event_t event, esp_avrc_tg_cb_param_t *param
     case ESP_AVRC_TG_PASSTHROUGH_CMD_EVT:
     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT:
     case ESP_AVRC_TG_SET_PLAYER_APP_VALUE_EVT:
-        dispatch_bluetooth_app_work_with_callback(bt_av_hdl_avrc_tg_evt, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
+        dispatch_bluetooth_app_work_with_callback(handle_bt_avrc_target_event, event, param, sizeof(esp_avrc_tg_cb_param_t), NULL);
         break;
     default:
         ESP_LOGE(BT_RC_TG_TAG, "Invalid AVRC event: %d", event);
