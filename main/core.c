@@ -1,12 +1,52 @@
 #include "core.h"
 
+/**
+ * @brief Queue handle for the Bluetooth application task.
+ *
+ * This queue is used to send events to the Bluetooth application task.
+ */
 static QueueHandle_t s_bt_app_task_queue = NULL;
+
+/**
+ * @brief Task handle for the Bluetooth application task.
+ *
+ * This handle is used to manage the Bluetooth application task.
+ */
 static TaskHandle_t s_bt_app_task_handle = NULL;
+
+/**
+ * @brief Task handle for the Bluetooth I2S task.
+ *
+ * This handle is used to manage the Bluetooth I2S task.
+ */
 static TaskHandle_t s_bt_i2s_task_handle = NULL;
+
+/**
+ * @brief Ring buffer handle for the I2S data.
+ *
+ * This ring buffer is used to store the I2S data.
+ */
 static RingbufHandle_t s_ringbuf_i2s = NULL;
+
+/**
+ * @brief Semaphore handle for I2S write operations.
+ *
+ * This semaphore is used to synchronize I2S write operations.
+ */
 static SemaphoreHandle_t s_i2s_write_semaphore = NULL;
+
+/**
+ * @brief Mode for the ring buffer.
+ *
+ * This variable determines the processing mode for the ring buffer.
+ */
 static uint16_t ringbuffer_mode = PROCESSING;
 
+/**
+ * @brief External reference to the DAC continuous handle.
+ *
+ * This handle is used to manage the DAC continuous mode.
+ */
 extern dac_continuous_handle_t tx_chan;
 
 bool send_bluetooth_app_message(bt_app_message_t *message)
@@ -64,11 +104,6 @@ void handle_i2s_task(void *taskArgument)
 {
     uint8_t *data = NULL;
     size_t item_size = 0;
-    /**
-     * The total length of DMA buffer of I2S is:
-     * `dma_frame_num * dma_desc_num * i2s_channel_num * i2s_data_bit_width / 8`.
-     * Transmit `dma_frame_num * dma_desc_num` bytes to DMA is trade-off.
-     */
     const size_t item_size_upto = 240 * 6;
     size_t bytes_written = 0;
 
@@ -79,7 +114,6 @@ void handle_i2s_task(void *taskArgument)
             while (true)
             {
                 item_size = 0;
-                /* receive data from ringbuffer and write it to I2S DMA transmit buffer */
                 data = (uint8_t *)xRingbufferReceiveUpTo(s_ringbuf_i2s, &item_size, (TickType_t)pdMS_TO_TICKS(20), item_size_upto);
                 if (item_size == 0)
                 {

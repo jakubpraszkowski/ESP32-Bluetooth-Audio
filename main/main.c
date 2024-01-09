@@ -33,7 +33,7 @@ void app_main(void)
         ESP_LOGE(BT_AV_TAG, "%s enable bluedroid failed: %s\n", __func__, esp_err_to_name(err));
         return;
     }
-
+    
     start_bluetooth_app_task();
 
     dispatch_bluetooth_app_work_with_callback(bt_av_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
